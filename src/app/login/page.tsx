@@ -1,20 +1,58 @@
 "use client";
 
-export const dynamic = "force-dynamic";       // Do not prerender this page
-export const fetchCache = "force-no-store";   // Optional: prevent any caching (safe for login pages)
+export const dynamic = "force-dynamic";       // Avoid prerendering for this route
+export const fetchCache = "force-no-store";   // Optional: disable caching for login
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { Suspense, useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Eye, EyeOff, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
+/**
+ * Page component: wraps the actual login form in Suspense.
+ * This satisfies Next.js requirement when useSearchParams() is used inside.
+ */
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginSkeleton />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+/** Lightweight fallback UI shown while the client boundary hydrates */
+function LoginSkeleton() {
+  return (
+    <div className="min-h-screen bg-app-bg flex items-center justify-center p-4">
+      <div className="relative w-full max-w-sm">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-trading-green/10 border border-trading-green/30 mb-4" />
+          <div className="h-4 w-40 mx-auto bg-panel-bg rounded mb-2" />
+          <div className="h-3 w-52 mx-auto bg-panel-bg rounded opacity-70" />
+        </div>
+        <div className="tp-card p-6">
+          <div className="h-4 w-56 bg-panel-bg rounded mb-6" />
+          <div className="space-y-4">
+            <div className="h-10 w-full bg-panel-bg rounded" />
+            <div className="h-10 w-full bg-panel-bg rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Actual login form. This is where we use useSearchParams()
+ * and any other client-only hooks safely.
+ */
+function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // safe here because it's inside <Suspense>
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -166,11 +204,3 @@ export default function LoginPage() {
 
         {/* Security note */}
         <div className="mt-4 text-center">
-          <p className="text-xs text-muted-text">
-            🔒 Protected with HTTP-only session cookies. Session lasts 7 days.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
