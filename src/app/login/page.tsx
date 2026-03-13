@@ -1,17 +1,14 @@
 "use client";
 
-export const dynamic = "force-dynamic";       // Avoid prerendering for this route
-export const fetchCache = "force-no-store";   // Optional: disable caching for login
+export const dynamic = "force-dynamic";       // do not prerender this page
+export const fetchCache = "force-no-store";   // optional: avoid caching on login
 
-import React, { Suspense, useState, useRef, useEffect } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Eye, EyeOff, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
-/**
- * Page component: wraps the actual login form in Suspense.
- * This satisfies Next.js requirement when useSearchParams() is used inside.
- */
+/** Top-level page: wrap the form (which uses useSearchParams) in Suspense */
 export default function LoginPage() {
   return (
     <Suspense fallback={<LoginSkeleton />}>
@@ -20,7 +17,7 @@ export default function LoginPage() {
   );
 }
 
-/** Lightweight fallback UI shown while the client boundary hydrates */
+/** Lightweight fallback while the client boundary hydrates */
 function LoginSkeleton() {
   return (
     <div className="min-h-screen bg-app-bg flex items-center justify-center p-4">
@@ -42,17 +39,15 @@ function LoginSkeleton() {
   );
 }
 
-/**
- * Actual login form. This is where we use useSearchParams()
- * and any other client-only hooks safely.
- */
+/** Actual login form (safe place to use useSearchParams) */
 function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const router = useRouter();
-  const searchParams = useSearchParams(); // safe here because it's inside <Suspense>
+  const searchParams = useSearchParams();           // <-- allowed inside Suspense
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -204,3 +199,11 @@ function LoginForm() {
 
         {/* Security note */}
         <div className="mt-4 text-center">
+          <p className="text-xs text-muted-text">
+            🔒 Protected with HTTP-only session cookies. Session lasts 7 days.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
