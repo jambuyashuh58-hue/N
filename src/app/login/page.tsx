@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+export const dynamic = "force-dynamic";       // Do not prerender this page
+export const fetchCache = "force-no-store";   // Optional: prevent any caching (safe for login pages)
+
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Eye, EyeOff, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -38,7 +41,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "Login failed. Please try again.");
+        setError(data?.error ?? "Login failed. Please try again.");
         setPassword("");
         inputRef.current?.focus();
         return;
@@ -59,16 +62,17 @@ export default function LoginPage() {
     <div className="min-h-screen bg-app-bg flex items-center justify-center p-4">
       {/* Background grid decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 opacity-[0.03]"
+        <div
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: "linear-gradient(#00d97e 1px, transparent 1px), linear-gradient(90deg, #00d97e 1px, transparent 1px)",
+            backgroundImage:
+              "linear-gradient(#00d97e 1px, transparent 1px), linear-gradient(90deg, #00d97e 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
       </div>
 
       <div className="relative w-full max-w-sm">
-
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-trading-green/10 border border-trading-green/30 mb-4">
@@ -110,7 +114,7 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPw(!showPw)}
+                  onClick={() => setShowPw((s) => !s)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-text hover:text-secondary-text transition-colors"
                   tabIndex={-1}
                 >
@@ -155,8 +159,7 @@ export default function LoginPage() {
             </code>
           </p>
           <p className="text-center text-xs text-muted-text mt-1">
-            Change it in{" "}
-            <code className="font-mono">.env.local</code> via{" "}
+            Change it in <code className="font-mono">.env.local</code> via{" "}
             <code className="font-mono">APP_PASSWORD</code>
           </p>
         </div>
